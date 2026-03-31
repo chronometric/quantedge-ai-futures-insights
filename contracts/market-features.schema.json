@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantedge.ai/schemas/market-features.json",
+  "title": "MarketFeatures",
+  "description": "Deterministic technical context passed to RAG/LLM and UI.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "symbol", "as_of", "interval"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "symbol": { "type": "string", "minLength": 1 },
+    "as_of": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Snapshot time (UTC) for this feature set."
+    },
+    "interval": {
+      "type": "string",
+      "pattern": "^[0-9]+[mhd]$"
+    },
+    "trend_regime": {
+      "type": "string",
+      "enum": ["bullish", "bearish", "neutral", "unknown"]
+    },
+    "volatility_regime": {
+      "type": "string",
+      "enum": ["low", "normal", "high", "unknown"]
+    },
+    "indicators": {
+      "type": "object",
+      "description": "Named numeric or string indicator values.",
+      "additionalProperties": true
+    },
+    "levels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PriceLevel" }
+    },
+    "patterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Short labels for detected patterns."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional machine-oriented notes for retrieval."
+    }
+  },
+  "$defs": {
+    "PriceLevel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["price", "kind"],
+      "properties": {
+        "price": { "type": "number" },
+        "kind": {
+          "type": "string",
+          "enum": ["support", "resistance", "pivot", "target", "stop", "other"]
+        },
+        "strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "label": { "type": "string" }
+      }
+    }
+  }
+}

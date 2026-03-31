@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantedge.ai/schemas/insight-payload.json",
+  "title": "InsightPayload",
+  "description": "Structured AI insight for overlays and narrative; validated at API boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "insight_id",
+    "symbol",
+    "generated_at",
+    "structured",
+    "narrative"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "insight_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "symbol": { "type": "string", "minLength": 1 },
+    "interval": {
+      "type": "string",
+      "pattern": "^[0-9]+[mhd]$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional freshness hint for UI."
+    },
+    "structured": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bias", "key_levels", "scenarios", "risk_notes"],
+      "properties": {
+        "bias": {
+          "type": "string",
+          "enum": ["bullish", "bearish", "neutral"]
+        },
+        "key_levels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["price", "role"],
+            "properties": {
+              "price": { "type": "number" },
+              "role": {
+                "type": "string",
+                "enum": ["support", "resistance", "target", "invalidation", "other"]
+              },
+              "priority": { "type": "integer", "minimum": 1, "maximum": 5 }
+            }
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "condition"],
+            "properties": {
+              "name": { "type": "string" },
+              "condition": { "type": "string" },
+              "implication": { "type": "string" }
+            }
+          }
+        },
+        "risk_notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "narrative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "trade_ideas": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["thesis"],
+            "properties": {
+              "thesis": { "type": "string" },
+              "horizon": {
+                "type": "string",
+                "enum": ["intraday", "short_swing", "other"]
+              },
+              "invalidation": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "chunk_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "kb_version": { "type": "string" }
+      }
+    },
+    "disclaimer": {
+      "type": "string",
+      "description": "Required legal/educational disclaimer text for production UI."
+    }
+  }
+}

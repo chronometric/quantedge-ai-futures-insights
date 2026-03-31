@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantedge.ai/schemas/ohlcv-bar.json",
+  "title": "OhlcvBar",
+  "description": "A single OHLCV candle for a futures contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "symbol",
+    "interval",
+    "time_open",
+    "time_close",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "symbol": {
+      "type": "string",
+      "description": "Provider or internal symbol, e.g. ES, NQ.",
+      "minLength": 1
+    },
+    "interval": {
+      "type": "string",
+      "description": "Bar size identifier, e.g. 5m.",
+      "pattern": "^[0-9]+[mhd]$"
+    },
+    "time_open": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Bar open time (UTC, RFC 3339)."
+    },
+    "time_close": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Bar close time (UTC, RFC 3339)."
+    },
+    "open": { "type": "number" },
+    "high": { "type": "number" },
+    "low": { "type": "number" },
+    "close": { "type": "number" },
+    "volume": {
+      "type": "number",
+      "minimum": 0
+    },
+    "source": {
+      "type": "string",
+      "description": "Optional data provider identifier."
+    },
+    "venue": {
+      "type": "string",
+      "description": "Optional exchange or venue code."
+    }
+  }
+}

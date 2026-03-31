@@ -1,0 +1,180 @@
+openapi: 3.1.0
+info:
+  title: QuantEdge AI API
+  description: |
+    Draft OpenAPI for the QuantEdge AI – Real-Time Futures Insights Engine (V1).
+    WebSocket contract remains in docs/api-contract.md until paths are finalized.
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://api.example.com
+    description: Production (placeholder)
+
+tags:
+  - name: health
+  - name: market
+  - name: insights
+
+paths:
+  /v1/health:
+    get:
+      tags: [health]
+      summary: Liveness probe
+      operationId: healthLive
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /v1/health/ready:
+    get:
+      tags: [health]
+      summary: Readiness probe
+      operationId: healthReady
+      responses:
+        "200":
+          description: Dependencies reachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Not ready
+
+  /v1/symbols:
+    get:
+      tags: [market]
+      summary: List symbols available in V1
+      operationId: listSymbols
+      responses:
+        "200":
+          description: Symbol list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SymbolListResponse"
+
+  /v1/market/{symbol}/bars:
+    get:
+      tags: [market]
+      summary: OHLCV bars for charting
+      operationId: getBars
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: interval
+          in: query
+          required: true
+          schema:
+            type: string
+            example: 5m
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5000
+      responses:
+        "200":
+          description: Bars
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BarsResponse"
+
+  /v1/insights:
+    post:
+      tags: [insights]
+      summary: Generate on-demand insight
+      operationId: createInsight
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsightRequest"
+      responses:
+        "200":
+          description: Insight payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightPayload"
+        "400":
+          description: Validation error
+        "429":
+          description: Rate limited
+        "503":
+          description: LLM or upstream unavailable
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: ok
+        version:
+          type: string
+        environment:
+          type: string
+
+    SymbolListResponse:
+      type: object
+      required: [symbols]
+      properties:
+        symbols:
+          type: array
+          items:
+            type: string
+
+    BarsResponse:
+      type: object
+      required: [bars]
+      properties:
+        bars:
+          type: array
+          items:
+            type: object
+            description: Validates against contracts/ohlcv-bar.schema.json
+
+    InsightRequest:
+      type: object
+      required: [symbol, interval]
+      properties:
+        symbol:
+          type: string
+        interval:
+          type: string
+          example: 5m
+        include_narrative:
+          type: boolean
+          default: true
+
+    InsightPayload:
+      type: object
+      description: Validates against contracts/insight-payload.schema.json
+      additionalProperties: true
