@@ -36,6 +36,10 @@ services:
       DATABASE_URL: postgresql+asyncpg://quantedge:quantedge@postgres:5432/quantedge
       REDIS_URL: redis://redis:6379/0
       CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      MARKET_SYMBOLS: ES,NQ
+      MOCK_MARKET_DATA: "true"
+      MOCK_TICK_SECONDS: "0.25"
+      RETENTION_MONTHS: "6"
     depends_on:
       postgres:
         condition: service_healthy

@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-import pytest
-from httpx import ASGITransport, AsyncClient
+from fastapi.testclient import TestClient
 
 from quantedge_backend.main import app
 
 
-@pytest.mark.asyncio
-async def test_health_live() -> None:
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.get("/v1/health")
+def test_health_live() -> None:
+    with TestClient(app) as client:
+        r = client.get("/v1/health")
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "ok"
@@ -20,9 +17,16 @@ async def test_health_live() -> None:
     assert "environment" in body
 
 
-@pytest.mark.asyncio
-async def test_health_ready() -> None:
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.get("/v1/health/ready")
+def test_health_ready() -> None:
+    with TestClient(app) as client:
+        r = client.get("/v1/health/ready")
     assert r.status_code == 200
+
+
+def test_symbols_list() -> None:
+    with TestClient(app) as client:
+        r = client.get("/v1/symbols")
+    assert r.status_code == 200
+    body = r.json()
+    assert "symbols" in body
+    assert isinstance(body["symbols"], list)
