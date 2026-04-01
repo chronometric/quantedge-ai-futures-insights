@@ -13,10 +13,10 @@ Real-time futures analytics platform: streaming OHLCV, deterministic technical c
 | `openapi/` | Machine-readable API draft |
 | `backend/` | Python 3.11+ FastAPI service |
 | `frontend/` | React + TypeScript + Vite |
-| `infra/` | Docker Compose (Postgres, Redis, API, UI) |
+| `infra/` | Docker Compose (Postgres, Redis, API, UI, nginx gateway) |
 | `.github/workflows/` | CI (lint, test, Docker builds) |
 
-## Quick start (Phase 2)
+## Quick start
 
 ### Docker Compose (full stack)
 
@@ -26,8 +26,9 @@ From the repository root:
 docker compose -f infra/docker-compose.yml up --build
 ```
 
-- **API:** `http://localhost:8000` — try `GET /v1/health`
-- **UI:** `http://localhost:5173`
+- **Gateway (same-origin UI + API + WebSocket):** `http://localhost:8080` (recommended)
+- **API (direct):** `http://localhost:8000` — e.g. `GET /v1/health`
+- **UI (direct, Vite):** `http://localhost:5173`
 - **Postgres:** `localhost:5432` (user / password / database: `quantedge`)
 - **Redis:** `localhost:6379`
 
