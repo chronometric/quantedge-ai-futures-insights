@@ -29,6 +29,7 @@ from quantedge_backend.market.stream import MarketRuntimeState, run_mock_pipelin
 from quantedge_backend.observability.logging_config import configure_logging
 from quantedge_backend.observability.metrics import prometheus_text
 from quantedge_backend.observability.middleware import CorrelationIdMiddleware
+from quantedge_backend.observability.security_headers import SecurityHeadersMiddleware
 from quantedge_backend.settings import get_settings
 
 
@@ -97,6 +98,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.add_middleware(CorrelationIdMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
     app.include_router(health_router)
     app.include_router(market_router)
     app.include_router(insights_router)
