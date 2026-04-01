@@ -57,6 +57,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
+    environment:
+      # Browser calls the host-mapped API port (not the Docker service hostname).
+      VITE_API_BASE_URL: http://localhost:8000
     depends_on:
       - backend
 
