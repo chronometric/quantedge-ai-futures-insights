@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from quantedge_backend.api.deps import get_market_state, get_session
 from quantedge_backend.db.bars_repo import bar_to_contract_dict, list_bars
+from quantedge_backend.features.snapshot import MIN_BARS, build_market_features
 from quantedge_backend.market.stream import MarketRuntimeState
 from quantedge_backend.settings import Settings, get_settings
 
@@ -54,6 +55,40 @@ async def get_bars(
         limit=limit,
     )
     return {"bars": [bar_to_contract_dict(r) for r in rows]}
+
+
+@router.get("/market/{symbol}/features")
+async def get_market_features(
+    symbol: str,
+    interval: str = Query(..., description="Bar interval, e.g. 5m"),
+    lookback: int = Query(120, ge=MIN_BARS, le=500),
+    token_budget: int | None = Query(
+        None,
+        description="Optional coarse LLM token budget (applies compaction).",
+        ge=256,
+        le=16000,
+    ),
+    *,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> dict[str, Any]:
+    """Deterministic technical context (pre-LLM) from recent stored bars."""
+    rows = await list_bars(
+        session,
+        symbol=symbol,
+        interval=interval,
+        start=None,
+        end=None,
+        limit=lookback,
+    )
+    try:
+        return build_market_features(
+            rows,
+            symbol=symbol,
+            interval=interval,
+            token_budget=token_budget,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/market/status")
