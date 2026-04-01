@@ -9,6 +9,8 @@ RUN pip install --no-cache-dir --upgrade pip hatchling
 
 COPY pyproject.toml README.md ./
 COPY src ./src
+COPY alembic.ini alembic.ini
+COPY alembic ./alembic
 
 RUN pip install --no-cache-dir .
 

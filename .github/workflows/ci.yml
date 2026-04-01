@@ -32,6 +32,8 @@ jobs:
         run: mypy src
       - name: Pytest
         run: pytest
+      - name: Alembic revision chain
+        run: alembic history
 
   frontend:
     runs-on: ubuntu-latest

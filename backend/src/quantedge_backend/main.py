@@ -18,6 +18,7 @@ from quantedge_backend.api.v1.market import router as market_router
 from quantedge_backend.api.ws import ConnectionManager
 from quantedge_backend.api.ws import router as ws_router
 from quantedge_backend.db.bars_repo import apply_retention
+from quantedge_backend.db.migrate import is_sqlite_url, run_alembic_upgrade
 from quantedge_backend.db.session import (
     create_all_tables,
     dispose_engine,
@@ -35,7 +36,10 @@ from quantedge_backend.settings import get_settings
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     init_engine(settings.database_url)
-    await create_all_tables()
+    if is_sqlite_url(settings.database_url):
+        await create_all_tables()
+    else:
+        await asyncio.to_thread(run_alembic_upgrade, settings.database_url)
     async with session_scope() as session:
         await apply_retention(session, retention_months=settings.retention_months)
     if settings.testing:
