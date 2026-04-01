@@ -7,12 +7,35 @@ export function getApiBase(): string {
   return ''
 }
 
-/** WebSocket URL for the streaming endpoint. */
-export function getWsUrl(apiBase: string): string {
-  if (apiBase) {
-    return `${apiBase.replace(/^http/, 'ws')}/v1/ws`
+/** Optional shared secret when the API enforces ``API_KEY`` (demo only; prefer gateway auth in prod). */
+export function getApiKey(): string | undefined {
+  const v = import.meta.env.VITE_API_KEY
+  if (v !== undefined && v !== '') {
+    return v
   }
-  const { protocol, host } = window.location
-  const wsProto = protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${wsProto}//${host}/v1/ws`
+  return undefined
+}
+
+/** Headers for authenticated REST calls (e.g. POST /v1/insights). */
+export function apiKeyHeaders(): Record<string, string> {
+  const k = getApiKey()
+  return k ? { 'X-API-Key': k } : {}
+}
+
+/** WebSocket URL for the streaming endpoint (adds ``?token=`` when ``VITE_API_KEY`` is set). */
+export function getWsUrl(apiBase: string): string {
+  let url: string
+  if (apiBase) {
+    url = `${apiBase.replace(/^http/, 'ws')}/v1/ws`
+  } else {
+    const { protocol, host } = window.location
+    const wsProto = protocol === 'https:' ? 'wss:' : 'ws:'
+    url = `${wsProto}//${host}/v1/ws`
+  }
+  const k = getApiKey()
+  if (k) {
+    const sep = url.includes('?') ? '&' : '?'
+    url = `${url}${sep}token=${encodeURIComponent(k)}`
+  }
+  return url
 }

@@ -10,6 +10,8 @@ _counts: dict[str, int] = {
     "quantedge_insights_generated_total": 0,
     "quantedge_ws_messages_sent_total": 0,
     "quantedge_pipeline_bars_emitted_total": 0,
+    "quantedge_rate_limit_exceeded_total": 0,
+    "quantedge_api_key_rejected_total": 0,
 }
 
 

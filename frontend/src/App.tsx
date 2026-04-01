@@ -17,20 +17,26 @@ export default function App() {
   const [insightsLoading, setInsightsLoading] = useState(false)
   const [apiOk, setApiOk] = useState<boolean | null>(null)
 
-  const onBar = useCallback((bar: OhlcvBar) => {
-    setBars((prev) => {
-      if (bar.symbol.toUpperCase() !== symbol.toUpperCase()) {
-        return prev
+  const onBar = useCallback(
+    (bar: OhlcvBar) => {
+      setBars((prev) => {
+        if (bar.symbol.toUpperCase() !== symbol.toUpperCase()) {
+          return prev
+        }
+        return mergeBarSeries(prev, bar)
+      })
+    },
+    [symbol],
+  )
+  const onInsight = useCallback(
+    (ins: InsightPayload) => {
+      if (ins.symbol.toUpperCase() !== symbol.toUpperCase()) {
+        return
       }
-      return mergeBarSeries(prev, bar)
-    })
-  }, [symbol])
-  const onInsight = useCallback((ins: InsightPayload) => {
-    if (ins.symbol.toUpperCase() !== symbol.toUpperCase()) {
-      return
-    }
-    setInsight(ins)
-  }, [symbol])
+      setInsight(ins)
+    },
+    [symbol],
+  )
   const { connected, streamError } = useMarketStream(symbol, { onBar, onInsight })
 
   useEffect(() => {

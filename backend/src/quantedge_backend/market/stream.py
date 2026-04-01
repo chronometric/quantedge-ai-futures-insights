@@ -69,11 +69,7 @@ async def run_mock_pipeline(
         close_iso = completed.time_close.isoformat().replace("+00:00", "Z")
         await state.record_5m_close(sym, close_iso)
 
-        if (
-            ws_manager is not None
-            and settings.ws_broadcast_enabled
-            and not settings.testing
-        ):
+        if ws_manager is not None and settings.ws_broadcast_enabled and not settings.testing:
             ch = f"market:{sym.upper()}:5m"
             inc("quantedge_pipeline_bars_emitted_total")
             await ws_manager.broadcast(

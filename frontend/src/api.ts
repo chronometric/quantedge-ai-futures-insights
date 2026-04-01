@@ -1,4 +1,4 @@
-import { getApiBase } from './config'
+import { apiKeyHeaders, getApiBase } from './config'
 import type { InsightPayload, OhlcvBar } from './types'
 
 async function parseJson<T>(res: Response): Promise<T> {
@@ -34,7 +34,7 @@ export async function requestInsight(symbol: string): Promise<InsightPayload> {
   const base = getApiBase()
   const res = await fetch(`${base}/v1/insights`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...apiKeyHeaders() },
     body: JSON.stringify({
       symbol,
       interval: '5m',

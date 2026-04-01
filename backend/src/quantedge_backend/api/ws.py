@@ -11,6 +11,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 
 from quantedge_backend.observability.metrics import inc
+from quantedge_backend.settings import get_settings
 
 log = structlog.get_logger("websocket")
 
@@ -56,7 +57,14 @@ class ConnectionManager:
 
 @router.websocket("/ws")
 async def stream_socket(websocket: WebSocket) -> None:
+    settings = get_settings()
     await websocket.accept()
+    if settings.api_key:
+        token = websocket.query_params.get("token", "")
+        if token != settings.api_key:
+            inc("quantedge_api_key_rejected_total")
+            await websocket.close(code=1008)
+            return
     manager: ConnectionManager = websocket.app.state.ws_manager
     try:
         while True:

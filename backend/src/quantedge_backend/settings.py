@@ -49,6 +49,14 @@ class Settings(BaseSettings):
     ws_broadcast_enabled: bool = Field(default=True, alias="WS_BROADCAST_ENABLED")
     stream_insights_on_bar: bool = Field(default=True, alias="STREAM_INSIGHTS_ON_BAR")
 
+    api_key: str | None = Field(default=None, alias="API_KEY")
+    insights_rate_limit_per_minute: int = Field(
+        default=30,
+        alias="INSIGHTS_RATE_LIMIT_PER_MINUTE",
+        ge=0,
+        le=100_000,
+    )
+
     @field_validator("market_symbols")
     @classmethod
     def strip_symbols(cls, v: str) -> str:

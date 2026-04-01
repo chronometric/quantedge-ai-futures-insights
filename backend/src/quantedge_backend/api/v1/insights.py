@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from quantedge_backend.api.deps import get_session
+from quantedge_backend.api.security import enforce_insight_rate_limit, require_api_key_if_configured
 from quantedge_backend.llm.insight_service import generate_insight
 from quantedge_backend.settings import Settings, get_settings
 
@@ -27,6 +28,8 @@ async def post_insight(
     body: InsightRequest,
     session: Annotated[AsyncSession, Depends(get_session)],
     settings: Annotated[Settings, Depends(get_settings)],
+    _auth: Annotated[None, Depends(require_api_key_if_configured)],
+    _rl: Annotated[None, Depends(enforce_insight_rate_limit)],
 ) -> dict[str, Any]:
     """RAG over KB + market snapshot; returns schema-shaped insight JSON."""
     try:
