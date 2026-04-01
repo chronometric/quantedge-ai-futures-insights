@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     kb_dir: str = Field(default="kb", alias="KB_DIR")
     rag_mock_insights: bool = Field(default=False, alias="RAG_MOCK_INSIGHTS")
 
+    log_json: bool = Field(default=False, alias="LOG_JSON")
+    ws_broadcast_enabled: bool = Field(default=True, alias="WS_BROADCAST_ENABLED")
+    stream_insights_on_bar: bool = Field(default=True, alias="STREAM_INSIGHTS_ON_BAR")
+
     @field_validator("market_symbols")
     @classmethod
     def strip_symbols(cls, v: str) -> str:

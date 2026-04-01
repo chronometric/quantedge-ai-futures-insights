@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from quantedge_backend.db.bars_repo import list_bars
 from quantedge_backend.features.snapshot import MIN_BARS, build_market_features
+from quantedge_backend.llm.safety import apply_safety_guardrails
 from quantedge_backend.llm.schemas import (
     EDUCATIONAL_DISCLAIMER,
     KeyLevel,
@@ -116,7 +117,7 @@ def build_mock_insight(
     )
     partial = LlmInsightPartial(structured=structured, narrative=narrative)
     retrieval = RetrievalBlock(chunk_ids=chunk_ids, kb_version=kb_version)
-    return insight_payload_to_dict(
+    raw = insight_payload_to_dict(
         partial,
         symbol=symbol,
         interval=interval,
@@ -125,6 +126,7 @@ def build_mock_insight(
         retrieval=retrieval,
         disclaimer=EDUCATIONAL_DISCLAIMER,
     )
+    return apply_safety_guardrails(raw)
 
 
 def _format_retrieved(chunks: list[RetrievedChunk]) -> str:
@@ -205,7 +207,7 @@ Narrative: {"full detail" if include_narrative else "concise summary under 800 c
             narrative=Narrative(summary=partial.narrative.summary[:800]),
         )
     retrieval = RetrievalBlock(chunk_ids=chunk_ids, kb_version=settings.kb_version)
-    return insight_payload_to_dict(
+    payload = insight_payload_to_dict(
         partial,
         symbol=symbol,
         interval=interval,
@@ -214,3 +216,4 @@ Narrative: {"full detail" if include_narrative else "concise summary under 800 c
         retrieval=retrieval,
         disclaimer=EDUCATIONAL_DISCLAIMER,
     )
+    return apply_safety_guardrails(payload)

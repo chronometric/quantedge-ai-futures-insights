@@ -9,11 +9,14 @@ from contextlib import asynccontextmanager, suppress
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import Redis
+from starlette.responses import Response
 
 from quantedge_backend import __version__
 from quantedge_backend.api.v1.health import router as health_router
 from quantedge_backend.api.v1.insights import router as insights_router
 from quantedge_backend.api.v1.market import router as market_router
+from quantedge_backend.api.ws import ConnectionManager
+from quantedge_backend.api.ws import router as ws_router
 from quantedge_backend.db.bars_repo import apply_retention
 from quantedge_backend.db.session import (
     create_all_tables,
@@ -22,6 +25,9 @@ from quantedge_backend.db.session import (
     session_scope,
 )
 from quantedge_backend.market.stream import MarketRuntimeState, run_mock_pipeline
+from quantedge_backend.observability.logging_config import configure_logging
+from quantedge_backend.observability.metrics import prometheus_text
+from quantedge_backend.observability.middleware import CorrelationIdMiddleware
 from quantedge_backend.settings import get_settings
 
 
@@ -41,10 +47,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await redis.ping()
     app.state.redis = redis
     app.state.market_state = MarketRuntimeState()
+    app.state.ws_manager = ConnectionManager()
     task: asyncio.Task[None] | None = None
     if settings.mock_market_data:
         task = asyncio.create_task(
-            run_mock_pipeline(settings, redis, app.state.market_state),
+            run_mock_pipeline(
+                settings,
+                redis,
+                app.state.market_state,
+                ws_manager=app.state.ws_manager,
+            ),
         )
     yield
     if task is not None:
@@ -65,6 +77,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    configure_logging(settings)
     origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
     app = FastAPI(
         title="QuantEdge AI API",
@@ -79,9 +92,19 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(CorrelationIdMiddleware)
     app.include_router(health_router)
     app.include_router(market_router)
     app.include_router(insights_router)
+    app.include_router(ws_router)
+
+    @app.get("/metrics", include_in_schema=False)
+    def metrics() -> Response:
+        return Response(
+            content=prometheus_text(),
+            media_type="text/plain; version=0.0.4; charset=utf-8",
+        )
+
     return app
 
 
