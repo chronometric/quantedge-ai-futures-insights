@@ -36,6 +36,15 @@ class Settings(BaseSettings):
 
     testing: bool = Field(default=False, alias="TESTING")
 
+    openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
+    chroma_persist_dir: str = Field(default=".chroma", alias="CHROMA_PERSIST_DIR")
+    rag_embedding_model: str = Field(default="text-embedding-3-small", alias="RAG_EMBEDDING_MODEL")
+    rag_chat_model: str = Field(default="gpt-4o-mini", alias="RAG_CHAT_MODEL")
+    rag_top_k: int = Field(default=5, alias="RAG_TOP_K", ge=1, le=20)
+    kb_version: str = Field(default="1.0.0", alias="KB_VERSION")
+    kb_dir: str = Field(default="kb", alias="KB_DIR")
+    rag_mock_insights: bool = Field(default=False, alias="RAG_MOCK_INSIGHTS")
+
     @field_validator("market_symbols")
     @classmethod
     def strip_symbols(cls, v: str) -> str:

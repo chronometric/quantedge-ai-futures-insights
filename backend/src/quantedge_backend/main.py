@@ -12,6 +12,7 @@ from redis.asyncio import Redis
 
 from quantedge_backend import __version__
 from quantedge_backend.api.v1.health import router as health_router
+from quantedge_backend.api.v1.insights import router as insights_router
 from quantedge_backend.api.v1.market import router as market_router
 from quantedge_backend.db.bars_repo import apply_retention
 from quantedge_backend.db.session import (
@@ -80,6 +81,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(health_router)
     app.include_router(market_router)
+    app.include_router(insights_router)
     return app
 
 

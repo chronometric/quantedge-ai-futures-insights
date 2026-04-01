@@ -12,6 +12,7 @@ node_modules/
 dist/
 build/
 .chroma/
+.chroma_test/
 *.log
 .DS_Store
 Thumbs.db

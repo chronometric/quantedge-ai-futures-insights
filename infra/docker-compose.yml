@@ -40,6 +40,11 @@ services:
       MOCK_MARKET_DATA: "true"
       MOCK_TICK_SECONDS: "0.25"
       RETENTION_MONTHS: "6"
+      KB_DIR: /app/kb
+      CHROMA_PERSIST_DIR: /app/.chroma
+    volumes:
+      - ../kb:/app/kb:ro
+      - chroma_data:/app/.chroma
     depends_on:
       postgres:
         condition: service_healthy
@@ -57,3 +62,4 @@ services:
 
 volumes:
   pgdata:
+  chroma_data:
