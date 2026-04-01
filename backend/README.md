@@ -16,8 +16,8 @@ pip install -e ".[dev]"
 | Task | Command |
 |------|---------|
 | Run API | `uvicorn quantedge_backend.main:app --reload --host 0.0.0.0 --port 8000` |
-| Lint | `ruff check src tests` |
-| Format | `ruff format src tests` |
+| Lint | `ruff check src tests alembic` |
+| Format | `ruff format src tests alembic` |
 | Typecheck | `mypy src` |
 | Tests | `pytest` |
 

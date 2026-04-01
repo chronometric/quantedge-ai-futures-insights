@@ -19,4 +19,4 @@ npm install
 | Prettier (write) | `npm run format`       |
 | Prettier (check) | `npm run format:check` |
 
-Default dev URL: `http://localhost:5173`. Point API calls at the backend (`http://localhost:8000` in local Compose).
+Default dev URL: `http://localhost:5173`. Leave `VITE_API_BASE_URL` unset (or empty) to use the Vite proxy to the backend on port 8000 (`/v1`, `/docs`, `/metrics`, etc.). Set `VITE_API_BASE_URL` explicitly if the UI should call the API on another origin (e.g. Docker Compose with the nginx gateway on port 8080).

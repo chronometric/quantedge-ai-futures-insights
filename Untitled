@@ -1,0 +1,7 @@
+## What you should do (directional)
+
+- **Define one identity model**: doctor = JWT user; patient/guest = either lightweight tokens per room or full accounts—pick one and align socket + REST.
+- **Implement AI as a pipeline**: capture transcript (or export from Metered if available) → store by `room_name` / meeting id → async job → structured note → file record + optional patient summary view.
+- **Unify realtime**: either fix `users_collection` + room-scoped emits, or replace with a simpler channel per `roomName` and drop broken private-chat DB paths.
+- **Align routes**: single source of truth for React routes; fix `ai-structure` nesting.
+- **Hardening**: env-based secrets, no credentials in repo, consistent JWT config, scoped chat.
